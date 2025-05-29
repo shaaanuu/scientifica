@@ -1,0 +1,72 @@
+name: Build & Release Fonts
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y fontforge python3 openjdk-17-jre zip woff-tools woff2
+
+      - name: Download BitsNPicas
+        run: curl -L -o BitsNPicas.jar https://github.com/kreativekorp/bitsnpicas/raw/master/downloads/BitsNPicas.jar
+
+      - name: Generate fonts
+        run: |
+          mkdir -p build/{ttf,otb,bdf,woff,woff2}
+          for f in src/*.sfd; do
+            name=$(basename "${f%.sfd}")
+            # TTF
+            java -jar BitsNPicas.jar convertbitmap -f ttf -o build/ttf/${name}.ttf $f
+            # OTB & BDF
+            fontforge -lang=ff -c "Open('$f'); Generate('build/otb/${name}.otb')"
+            fontforge -lang=ff -c "Open('$f'); Generate('build/bdf/${name}.bdf')"
+            # WOFF/WOFF2
+            woff2_compress build/ttf/${name}.ttf
+            woff2_decompress build/ttf/${name}.ttf.woff2 -o build/woff/${name}.woff
+            mv build/ttf/${name}.ttf.woff2 build/woff2/${name}.woff2
+          done
+
+      - name: Generate variable font
+        run: |
+          fontforge -lang=ff -c "
+            Open('src/scientifica.sfd');
+            MergeFonts('src/scientificaItalic.sfd');
+            MergeFonts('src/scientificaBold.sfd');
+            Generate('scientifica-variable.ttf');
+          "
+          woff2_compress scientifica-variable.ttf
+          woff2_decompress scientifica-variable.ttf.woff2 -o scientifica-variable.woff
+
+      - name: Zip outputs
+        run: |
+          cd build
+          zip -r ../scientifica-ttf.zip ttf
+          zip -r ../scientifica-otb.zip otb
+          zip -r ../scientifica-bdf.zip bdf
+          zip -r ../scientifica-woff.zip woff
+          zip -r ../scientifica-woff2.zip woff2
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            scientifica-ttf.zip
+            scientifica-otb.zip
+            scientifica-bdf.zip
+            scientifica-woff.zip
+            scientifica-woff2.zip
+            scientifica-variable.ttf
+            scientifica-variable.woff
+            scientifica-variable.ttf.woff2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
