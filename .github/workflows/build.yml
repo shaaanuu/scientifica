@@ -41,21 +41,14 @@ jobs:
           zip -r ../scientifica-bdf.zip bdf
           zip -r ../scientifica-woff2.zip woff2
 
-      - name: Create release tag
+      - name: Upload to release
         run: |
+          version=$(grep -oP '^## \K\S+' CHANGELOG.md | tail -1)
+          body=$(awk -v ver="## $version" '$0==ver{flag=1;next}/^## /{flag=0}flag' CHANGELOG.md | sed '/^\s*$/d')
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git tag v1.0.${{ github.run_number }}
-          git push origin v1.0.${{ github.run_number }}
-
-      - name: Upload to release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          files: |
-            scientifica-ttf.zip
-            scientifica-otb.zip
-            scientifica-bdf.zip
-            scientifica-woff2.zip
+          git tag "$version"
+          git push origin "$version"
+          gh release create "$version" -t "$version" -n "$body" scientifica-ttf.zip scientifica-otb.zip scientifica-bdf.zip scientifica-woff2.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
