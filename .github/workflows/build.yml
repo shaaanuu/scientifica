@@ -35,14 +35,10 @@ jobs:
 
       - name: Generate variable font
         run: |
-          fontforge -lang=ff -c "
-            Open('src/scientifica.sfd');
-            MergeFonts('src/scientificaItalic.sfd');
-            MergeFonts('src/scientificaBold.sfd');
-            Generate('scientifica-variable.ttf');
-          "
-          woff2_compress scientifica-variable.ttf
-          woff2_decompress scientifica-variable.ttf.woff2 -o scientifica-variable.woff
+          mkdir -p build/variable
+          fontforge -lang=ff -c 'Open("src/scientifica.sfd"); MergeFonts("src/scientificaItalic.sfd"); MergeFonts("src/scientificaBold.sfd"); Generate("build/variable/scientifica-variable.ttf");'
+          woff2_compress build/variable/scientifica-variable.ttf
+          mv build/variable/scientifica-variable.woff2 build/variable/scientifica-variable.woff2
 
       - name: Zip outputs
         run: |
