@@ -30,8 +30,8 @@ jobs:
             fontforge -lang=ff -c "Open('$f'); Generate('build/bdf/${name}.bdf')"
             # WOFF/WOFF2
             woff2_compress build/ttf/${name}.ttf
-            woff2_decompress build/ttf/${name}.ttf.woff2 -o build/woff/${name}.woff
-            mv build/ttf/${name}.ttf.woff2 build/woff2/${name}.woff2
+            mv build/ttf/${name}.woff2 build/woff2/${name}.woff2
+            woff2_decompress build/woff2/${name}.woff2 -o build/woff/${name}.woff
           done
 
       - name: Generate variable font
