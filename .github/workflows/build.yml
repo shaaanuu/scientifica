@@ -24,14 +24,15 @@ jobs:
           for f in src/*.sfd; do
             name=$(basename "${f%.sfd}")
             # TTF
-            java -jar BitsNPicas.jar convertbitmap -f ttf -o build/ttf/${name}.ttf $f
+            java -jar BitsNPicas.jar convertbitmap -f ttf -o build/ttf/${name}.ttf "$f"
             # OTB & BDF
             fontforge -lang=ff -c "Open('$f'); Generate('build/otb/${name}.otb')"
             fontforge -lang=ff -c "Open('$f'); Generate('build/bdf/${name}.bdf')"
-            # WOFF/WOFF2
+            # WOFF
+            ttf2woff build/ttf/${name}.ttf build/woff/${name}.woff
+            # WOFF2
             woff2_compress build/ttf/${name}.ttf
             mv build/ttf/${name}.woff2 build/woff2/${name}.woff2
-            woff2_decompress build/woff2/${name}.woff2 -o build/woff/${name}.woff
           done
 
       - name: Generate variable font
