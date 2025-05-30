@@ -28,8 +28,6 @@ jobs:
             # OTB & BDF
             fontforge -lang=ff -c "Open('$f'); Generate('build/otb/${name}.otb')"
             fontforge -lang=ff -c "Open('$f'); Generate('build/bdf/${name}.bdf')"
-            # WOFF
-            ttf2woff build/ttf/${name}.ttf build/woff/${name}.woff
             # WOFF2
             woff2_compress build/ttf/${name}.ttf
             mv build/ttf/${name}.woff2 build/woff2/${name}.woff2
