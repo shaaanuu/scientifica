@@ -16,7 +16,7 @@ jobs:
           sudo apt install -y fontforge python3 openjdk-17-jre zip woff-tools woff2
 
       - name: Download BitsNPicas
-        run: curl -L -o BitsNPicas.jar https://github.com/kreativekorp/bitsnpicas/raw/master/downloads/BitsNPicas.jar
+        run: curl -L -o BitsNPicas.jar https://github.com/kreativekorp/bitsnpicas/releases/download/v2.0.2/BitsNPicas.jar
 
       - name: Generate fonts
         run: |
