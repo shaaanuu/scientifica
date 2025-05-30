@@ -33,12 +33,12 @@ jobs:
             mv build/ttf/${name}.woff2 build/woff2/${name}.woff2
           done
 
-      - name: Generate variable font
-        run: |
-          mkdir -p build/variable
-          fontforge -lang=ff -c 'Open("src/scientifica.sfd"); MergeFonts("src/scientificaItalic.sfd"); MergeFonts("src/scientificaBold.sfd"); Generate("build/variable/scientifica-variable.ttf");'
-          woff2_compress build/variable/scientifica-variable.ttf
-          mv build/variable/scientifica-variable.woff2 build/variable/scientifica-variable.woff2
+      # - name: Generate variable font
+      #   run: |
+      #     mkdir -p build/variable
+      #     fontforge -lang=ff -c 'Open("src/scientifica.sfd"); MergeFonts("src/scientificaItalic.sfd"); MergeFonts("src/scientificaBold.sfd"); Generate("build/variable/scientifica-variable.ttf");'
+      #     woff2_compress build/variable/scientifica-variable.ttf
+      #     mv build/variable/scientifica-variable.woff2 build/variable/scientifica-variable.woff2
 
       - name: Zip outputs
         run: |
@@ -58,8 +58,8 @@ jobs:
             scientifica-bdf.zip
             scientifica-woff.zip
             scientifica-woff2.zip
-            scientifica-variable.ttf
-            scientifica-variable.woff
-            scientifica-variable.ttf.woff2
+            # scientifica-variable.ttf
+            # scientifica-variable.woff
+            # scientifica-variable.ttf.woff2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
