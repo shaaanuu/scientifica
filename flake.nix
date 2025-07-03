@@ -3,8 +3,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
   };
-  outputs =
-    {self, nixpkgs, ...}:
+  outputs = { self, nixpkgs, ... }:
     let
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
@@ -13,37 +12,20 @@
           inherit system;
           overlays = [ self.overlay ];
         });
-    in
-    {
-      overlay = final: prev: rec {
-        bitsnpicas = final.stdenvNoCC.mkDerivation {
-          pname = "bitsnpicas";
-          version = "2.0.2";
-          
-          src = final.fetchurl {
-            url = "https://github.com/kreativekorp/bitsnpicas/releases/download/v2.0.2/BitsNPicas.jar";
-            sha256 = "sha256-wJFIo2N6+Rk3COuh6QZw0d5IRNE19v273FR7MXeF6Ts=";
-          };
-          
-          nativeBuildInputs = [ final.makeWrapper ];
-          
-          dontUnpack = true;
-          
-          installPhase = ''
-            runHook preInstall
-            mkdir -p $out/share/java $out/bin
-            cp $src $out/share/java/BitsNPicas.jar
-            makeWrapper ${final.jdk}/bin/java $out/bin/bitsnpicas \
-              --add-flags "-jar $out/share/java/BitsNPicas.jar"
-            runHook postInstall
-          '';
-        };
-        
+      bitsnpicasJar = builtins.fetchurl {
+        url = "https://github.com/kreativekorp/bitsnpicas/releases/download/v2.1/BitsNPicas.jar";
+        sha256 = "sha256:0iw5v8235vkl21r2qlbxcw0w6p7ii6s6fjnj6l0dq0n4hm70skmk";
+      };
+    in {
+      overlay = final: prev: {
+        bitsnpicas = final.writeScriptBin "bitsnpicas" ''
+          exec ${final.jdk}/bin/java -jar ${bitsnpicasJar} "$@"
+        '';
         scientifica = final.stdenvNoCC.mkDerivation {
           pname = "scientifica";
-          version = "v2.3";
+          version = "v2.4";
           src = ./src;
-          nativeBuildInputs = [ final.fontforge bitsnpicas ];
+          nativeBuildInputs = [ final.fontforge final.bitsnpicas ];
           buildPhase = ''
             runHook preBuild
             ff_filter() {
@@ -65,15 +47,12 @@
             popd
             runHook postBuild
           '';
-          installPhase = ''
-            runHook preInstall
-            runHook postInstall
-          '';
+          installPhase = "true";
         };
       };
       packages = forAllSystems (system: {
-        inherit (nixpkgsFor."${system}") scientifica bitsnpicas;
+        inherit (nixpkgsFor.${system}) scientifica bitsnpicas;
       });
-      defaultPackage = forAllSystems (system: self.packages."${system}".scientifica);
+      defaultPackage = forAllSystems (system: self.packages.${system}.scientifica);
     };
 }
