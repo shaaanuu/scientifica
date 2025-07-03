@@ -25,7 +25,7 @@
           pname = "scientifica";
           version = "v2.4";
           src = ./src;
-          nativeBuildInputs = [ final.fontforge final.bitsnpicas ];
+          nativeBuildInputs = [ final.fontforge final.bitsnpicas final.zip ];
           buildPhase = ''
             runHook preBuild
             ff_filter() {
@@ -44,6 +44,8 @@
               ff_filter "$i" "$out/otb/$file_name.otb"
               ff_filter "$i" "$out/bdf/$file_name.bdf"
             done
+            for fmt in ttf otb bdf; do zip -r $out/scientifica-$fmt.zip $out/$fmt; done
+            rm -r $out/{ttf,otb,bdf}
             popd
             runHook postBuild
           '';
