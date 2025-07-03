@@ -25,7 +25,7 @@
           pname = "scientifica";
           version = "v2.4";
           src = ./src;
-          nativeBuildInputs = [ final.fontforge final.bitsnpicas final.zip ];
+          nativeBuildInputs = [ final.fontforge final.bitsnpicas final.zip final.woff2 ];
           buildPhase = ''
             runHook preBuild
             ff_filter() {
@@ -34,7 +34,7 @@
             ttf_filter() {
               bitsnpicas convertbitmap -f ttf -o "$2" "$1"
             }
-            mkdir -p $out/{ttf,otb,bdf}
+            mkdir -p $out/{ttf,otb,bdf,woff2}
             pushd $src
             # generate font files
             for i in *; do
@@ -43,9 +43,11 @@
               ttf_filter "$i" "$out/ttf/$file_name.ttf"
               ff_filter "$i" "$out/otb/$file_name.otb"
               ff_filter "$i" "$out/bdf/$file_name.bdf"
+              woff2_compress $out/ttf/$file_name.ttf
+              mv $out/ttf/$file_name.woff2 $out/woff2/$file_name.woff2
             done
-            for fmt in ttf otb bdf; do zip -r $out/scientifica-$fmt.zip $out/$fmt; done
-            rm -r $out/{ttf,otb,bdf}
+            for fmt in ttf otb bdf woff2; do zip -r $out/scientifica-$fmt.zip $out/$fmt; done
+            rm -r $out/{ttf,otb,bdf,woff2}
             popd
             runHook postBuild
           '';
